@@ -1,3 +1,5 @@
+totalNumMines(10).
+
 % Políčka musí být rozlišitelná, i když budou obsahovat stejné číslo
 % -> budeme používat formát ID-číslo/mina (např a2-7)
 mineFine(Board, Tile-Tail) :-
@@ -34,7 +36,7 @@ countMines([_-A | Rest], Result) :-
         countMines(Rest, Result)
     ).
 
-testBoard([[a-A, b-B, c-C],[d-D, e-E, f-F],[g-G, h-H, i-I]]).
+testBoard([[a-A, b-B, c-C],[d-D, e-E, f-F],[g-G, h-2, i-I]]).
 gameBoard(
     [
         [a1-A1, a2-A2, a3-A3, a4-A4, a5-A5, a6-A6, a7-A7, a8-A8],
@@ -60,7 +62,7 @@ gameBoard2(
     ]
     ).
 gameBoard3(
-    [
+    [ 
         [a1-A1, a2-2, a3-A3, a4-A4, a5-A5, a6-A6, a7-A7, a8-A8],
         [b1-B1, b2-B2, b3-B3, b4-B4, b5-5, b6-B6, b7-B7, b8-B8],
         [c1-C1, c2-C2, c3-C3, c4-C4, c5-C5, c6-C6, c7-C7, c8-C8],
@@ -90,62 +92,87 @@ countBoard([Row | Rest], Mines) :-
     countBoard(Rest, MinesRest),
     Mines is MinesRow + MinesRest.
 
-%generateRow(Row, Count) :- % hack, I want to nondeterministically choose, which pattern match to try first
-%    random_between(0, 1, X),
-%    (
-%        (
-%            X == 0,
-%            generateRow1(Row, Count)
-%        );
-%        (
-%            X == 1,
-%            generateRow2(Row, Count)
-%        )
-%    ).
-%generateRow1([], 0).
-%generateRow1([_-A | Rest], Count) :-
-%    \+ A == x,
-%    generateRow(Rest, Count).
-%generateRow1([_-x | Rest], Count) :-
-%    Count > 0,
-%    RestCount is Count - 1,
-%    generateRow(Rest, RestCount).
-%generateRow2([], 0).
-%generateRow2([_-x | Rest], Count) :-
-%    Count > 0,
-%    RestCount is Count - 1,
-%    generateRow(Rest, RestCount).
-%generateRow2([_-A | Rest], Count) :-
-%    \+ A == x,
-%    generateRow(Rest, Count).
-%
-%generateBoard([], 0).
-%generateBoard([Row | Rest], Count) :-
-%    Minimum is min(Count, 8),
-%    findall(X, between(0, Minimum, X), Result),
-%    random_permutation(Result, Perm), % random yields just one result, but we might want to backtrack
-%    member(CountRow, Perm),
-%    generateRow(Row, CountRow),
-%    CountRest is Count - CountRow,
-%    generateBoard(Rest, CountRest).
+%addMines(_, 0).
+%addMines(Board, N) :-
+    %satisfyNeighbours(Board, N),
+%    random_permutation(Board, Perm),
+%    member(Row, Perm),
+%    addMineRow(Row),
+%    M is N-1,
+%    addMinesDeterministic(Perm, M).
 
-addMines(_, 0).
-addMines(Board, N) :-
-    satisfyNeighbours(Board, N),
-    random_permutation(Board, Perm),
-    member(Row, Perm),
-    addMineRow(Row),
-    M is N-1,
-    addMines(Perm, M).
+%addMinesDeterministic(Perm, M) :-
+%    member(Row, Perm),
+%    addMineRow(Row),
+%    M is N-1,
+%    addMinesDeterministic()
 
-addMineRow(Row) :-
-    random_permutation(Row, Perm),
-    member(_-A, Perm),
-    \+ A == x,
-    A = x.
+%addMineRow(Row) :-
+%    random_permutation(Row, Perm),
+%    member(_-A, Perm),
+%    \+ A == x,
+%    A = x.
+
+isNotMine(_-0).
+isNotMine(_-1).
+isNotMine(_-2).
+isNotMine(_-3).
+isNotMine(_-4).
+isNotMine(_-5).
+isNotMine(_-6).
+isNotMine(_-7).
+isNotMine(_-8).
+
+isMine(_-x).
+
+isNumber(_-Tile) :-
+    Tile == 0;
+    Tile == 1;
+    Tile == 2;
+    Tile == 3;
+    Tile == 4;
+    Tile == 5;
+    Tile == 6;
+    Tile == 7;
+    Tile == 8.
+
+satisfyNumbers(_, N, [], N).
+satisfyNumbers(Board, N, [Row|Rest], M) :-
+    satisfyNumbersRow(Board, N, Row, O),
+    satisfyNumbers(Board, O, Rest, M).
+
+satisfyNumbersRow(_, N, [], N).
+satisfyNumbersRow(Board, N, [Coords-Count|Rest], M) :-
+    isNumber(Coords-Count),
+    neighbours(Board, Coords-Count, Neighbours),
+    addNeighbourMines(Count, Neighbours),
+    O is N - Count,
+    satisfyNumbersRow(Board, O, Rest, M).
+
+satisfyNumbersRow(Board, N, [Coords-Count|Rest], M) :-
+    \+ isNumber(Coords-Count),
+    satisfyNumbersRow(Board, N, Rest, M).
+
+addNeighbourMines(0, _).
+addNeighbourMines(N, [First|Others]) :-
+    N >= 0,
+    (
+        (
+        isMine(First),
+        O is N - 1,
+        addNeighbourMines(O, Others)
+        );
+        (
+        isNotMine(First),
+        addNeighbourMines(N, Others)
+        )
+    ).
+
 
 solution(Board) :-
-    addMines(Board, 10),
+    totalNumMines(N),
+    satisfyNumbers(N, Board, Rest),
+    distributeRest(Board, Rest),
     boardFine(Board).
 
 % get neighbours of a tile
