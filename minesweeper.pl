@@ -2,51 +2,20 @@ totalNumMines(10).
 
 % Políčka musí být rozlišitelná, i když budou obsahovat stejné číslo
 % -> budeme používat formát ID-číslo/mina (např a2-7)
-mineFine(Board, Tile-Tail) :-
-    (
-        Tail == x
-    );
-    (
-        \+ Tail == x,
-        neighbours(Board, Tile-Tail, Neighbours),
-        countMines(Neighbours, N),
-        Tail = N
-    ).
 
-boardFine(Board) :- boardFine(Board, Board).
-boardFine(_, []).
-boardFine(FullBoard, [Row | Rest]) :-
-    rowFine(FullBoard, Row),
-    boardFine(FullBoard, Rest).
+miniBoard([[a-1, b-_],[c-1, d-_]]).
 
-rowFine(_, []).
-rowFine(FullBoard, [Tile | Rest]) :-
-    rowFine(FullBoard, Rest),
-    mineFine(FullBoard, Tile).
-
-countMines([],0).
-countMines([_-A | Rest], Result) :-
-    (
-        A == x,
-        countMines(Rest, CountRest),
-        Result is CountRest + 1
-    );
-    (
-        \+ A == x,
-        countMines(Rest, Result)
-    ).
-
-testBoard([[a-A, b-B, c-C],[d-D, e-E, f-F],[g-G, h-2, i-I]]).
+testBoard([[a-_, b-_, c-_],[d-_, e-_, f-_],[g-_, h-2, i-_]]).
 gameBoard(
     [
-        [a1-A1, a2-A2, a3-A3, a4-A4, a5-A5, a6-A6, a7-A7, a8-A8],
-        [b1-B1, b2-B2, b3-B3, b4-B4, b5-B5, b6-B6, b7-B7, b8-B8],
-        [c1-C1, c2-C2, c3-C3, c4-C4, c5-C5, c6-C6, c7-C7, c8-C8],
-        [d1-D1, d2-D2, d3-D3, d4-D4, d5-D5, d6-D6, d7-D7, d8-D8],
-        [e1-E1, e2-E2, e3-E3, e4-E4, e5-E5, e6-E6, e7-E7, e8-E8],
-        [f1-F1, f2-F2, f3-F3, f4-F4, f5-F5, f6-F6, f7-F7, f8-F8],
-        [g1-G1, g2-G2, g3-G3, g4-G4, g5-G5, g6-G6, g7-G7, g8-G8],
-        [h1-H1, h2-H2, h3-H3, h4-H4, h5-H5, h6-H6, h7-H7, h8-H8]
+        [a1-_, a2-_, a3-_, a4-_, a5-_, a6-_, a7-_, a8-_],
+        [b1-_, b2-_, b3-_, b4-_, b5-_, b6-_, b7-_, b8-_],
+        [c1-_, c2-_, c3-_, c4-_, c5-_, c6-_, c7-_, c8-_],
+        [d1-_, d2-_, d3-_, d4-_, d5-_, d6-_, d7-_, d8-_],
+        [e1-_, e2-_, e3-_, e4-_, e5-_, e6-_, e7-_, e8-_],
+        [f1-_, f2-_, f3-_, f4-_, f5-_, f6-_, f7-_, f8-_],
+        [g1-_, g2-_, g3-_, g4-_, g5-_, g6-_, g7-_, g8-_],
+        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
     ]
     ).
 gameBoard2(
@@ -57,21 +26,48 @@ gameBoard2(
         [d1-0, d2-0, d3-0, d4-0, d5-0, d6-0, d7-0, d8-0],
         [e1-0, e2-0, e3-0, e4-0, e5-0, e6-0, e7-0, e8-0],
         [f1-0, f2-0, f3-0, f4-0, f5-0, f6-1, f7-2, f8-2],
-        [g1-2, g2-3, g3-3, g4-3, g5-3, g6-4, g7-G7, g8-G8],
-        [h1-H1, h2-H2, h3-H3, h4-H4, h5-H5, h6-H6, h7-H7, h8-H8]
+        [g1-2, g2-3, g3-3, g4-3, g5-3, g6-4, g7-_, g8-_],
+        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
     ]
     ).
 gameBoard3(
     [ 
-        [a1-A1, a2-2, a3-A3, a4-A4, a5-A5, a6-A6, a7-A7, a8-A8],
-        [b1-B1, b2-B2, b3-B3, b4-B4, b5-5, b6-B6, b7-B7, b8-B8],
-        [c1-C1, c2-C2, c3-C3, c4-C4, c5-C5, c6-C6, c7-C7, c8-C8],
-        [d1-D1, d2-D2, d3-D3, d4-D4, d5-D5, d6-D6, d7-D7, d8-D8],
-        [e1-E1, e2-E2, e3-E3, e4-E4, e5-E5, e6-E6, e7-E7, e8-E8],
-        [f1-F1, f2-F2, f3-F3, f4-F4, f5-F5, f6-F6, f7-F7, f8-F8],
-        [g1-G1, g2-G2, g3-G3, g4-G4, g5-G5, g6-G6, g7-G7, g8-G8],
-        [h1-H1, h2-H2, h3-H3, h4-H4, h5-H5, h6-H6, h7-H7, h8-H8]
+        [a1-_, a2-2, a3-_, a4-_, a5-_, a6-_, a7-_, a8-_],
+        [b1-_, b2-_, b3-_, b4-_, b5-5, b6-_, b7-_, b8-_],
+        [c1-_, c2-_, c3-_, c4-_, c5-_, c6-_, c7-_, c8-_],
+        [d1-_, d2-_, d3-_, d4-_, d5-_, d6-_, d7-_, d8-_],
+        [e1-_, e2-_, e3-_, e4-_, e5-_, e6-_, e7-_, e8-_],
+        [f1-_, f2-_, f3-0, f4-_, f5-_, f6-_, f7-_, f8-_],
+        [g1-_, g2-_, g3-_, g4-_, g5-_, g6-_, g7-_, g8-_],
+        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
     ]
+    ).
+
+gameBoard4(
+    [ 
+        [a1-2, a2-2, a3-_, a4-_, a5-_, a6-_, a7-_, a8-_],
+        [b1-_, b2-_, b3-_, b4-_, b5-5, b6-_, b7-_, b8-_],
+        [c1-_, c2-_, c3-_, c4-_, c5-_, c6-_, c7-_, c8-_],
+        [d1-_, d2-_, d3-_, d4-_, d5-_, d6-_, d7-_, d8-_],
+        [e1-_, e2-_, e3-_, e4-_, e5-_, e6-_, e7-_, e8-_],
+        [f1-_, f2-_, f3-1, f4-_, f5-_, f6-_, f7-_, f8-_],
+        [g1-_, g2-_, g3-_, g4-_, g5-_, g6-_, g7-_, g8-_],
+        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
+    ]
+    ).
+
+% ------------------------------------------------------------------------------------------
+
+countMines([],0, _).
+countMines([_-A | Rest], Result, NotMines) :-
+    (
+        A == x,
+        countMines(Rest, CountRest, NotMines),
+        Result is CountRest + 1
+    );
+    (
+        A \== x,
+        countMines(Rest, Result, NotMines)
     ).
 
 show([]).
@@ -86,33 +82,6 @@ showRow([_-A | Rest]) :-
     write(' '),
     showRow(Rest).
 
-countBoard([], 0).
-countBoard([Row | Rest], Mines) :-
-    countMines(Row, MinesRow),
-    countBoard(Rest, MinesRest),
-    Mines is MinesRow + MinesRest.
-
-%addMines(_, 0).
-%addMines(Board, N) :-
-    %satisfyNeighbours(Board, N),
-%    random_permutation(Board, Perm),
-%    member(Row, Perm),
-%    addMineRow(Row),
-%    M is N-1,
-%    addMinesDeterministic(Perm, M).
-
-%addMinesDeterministic(Perm, M) :-
-%    member(Row, Perm),
-%    addMineRow(Row),
-%    M is N-1,
-%    addMinesDeterministic()
-
-%addMineRow(Row) :-
-%    random_permutation(Row, Perm),
-%    member(_-A, Perm),
-%    \+ A == x,
-%    A = x.
-
 isNotMine(_-0).
 isNotMine(_-1).
 isNotMine(_-2).
@@ -123,73 +92,224 @@ isNotMine(_-6).
 isNotMine(_-7).
 isNotMine(_-8).
 
-isMine(_-x).
+isNumber( _-Tile) :-
+     Tile == 0;
+     Tile == 1;
+     Tile == 2;
+     Tile == 3;
+     Tile == 4;
+     Tile == 5;
+     Tile == 6;
+     Tile == 7;
+     Tile == 8.
 
-isNumber(_-Tile) :-
-    Tile == 0;
-    Tile == 1;
-    Tile == 2;
-    Tile == 3;
-    Tile == 4;
-    Tile == 5;
-    Tile == 6;
-    Tile == 7;
-    Tile == 8.
+%satisfyNumbers(+FullBoard, +MaximumNumberOfMines, +BoardYetToSatisfy, -RemainingNumberOfMines, +NotMinesOld, -NotMinesNew)
+satisfyNumbers(_, K, [], K, N, N).
+satisfyNumbers(Board, N, [Row|Rest], M, NotMinesOld, NotMinesNew) :-
+     satisfyNumbersRow(Board, N, Row, O, NotMinesOld, NotMines),
+     satisfyNumbers(Board, O, Rest, M, NotMines, NotMinesNew).
+ 
+satisfyNumbersRow(_, K, [], K, N, N).
+satisfyNumbersRow(Board, N, [Coords-Count|Rest], M, NotMinesOld, NotMinesNew) :-
+     isNumber(Coords-Count),
+     listWithElem(NotMinesOld, Coords-Count, NotMinesWithTile),
+     !,
+     neighbours(Board, Coords-Count, Neighbours),
+     addNeighbourMines(Count, Neighbours, NotMinesWithTile, NotMines, Added),
+     O is N - Added,
+     O >= 0,
+     satisfyNumbersRow(Board, O, Rest, M, NotMines, NotMinesNew).
 
-satisfyNumbers(_, N, [], N).
-satisfyNumbers(Board, N, [Row|Rest], M) :-
-    satisfyNumbersRow(Board, N, Row, O),
-    satisfyNumbers(Board, O, Rest, M).
+satisfyNumbersRow(Board, N, [_|Rest], M, NotMinesOld, NotMinesNew) :-
+    satisfyNumbersRow(Board, N, Rest, M, NotMinesOld, NotMinesNew).
 
-satisfyNumbersRow(_, N, [], N).
-satisfyNumbersRow(Board, N, [Coords-Count|Rest], M) :-
-    isNumber(Coords-Count),
-    neighbours(Board, Coords-Count, Neighbours),
-    addNeighbourMines(Count, Neighbours),
-    O is N - Count,
-    satisfyNumbersRow(Board, O, Rest, M).
+%addNeighbourMines(+Count, +Neighbours, +NotMines)
+addNeighbourMines(0, [], N, N, 0).
 
-satisfyNumbersRow(Board, N, [Coords-Count|Rest], M) :-
-    \+ isNumber(Coords-Count),
-    satisfyNumbersRow(Board, N, Rest, M).
-
-addNeighbourMines(0, _).
-addNeighbourMines(N, [First|Others]) :-
+addNeighbourMines(N, [_-Tail|Others], NotMines, NewNotMines, Added) :-
     N >= 0,
-    (
-        (
-        isMine(First),
-        O is N - 1,
-        addNeighbourMines(O, Others)
-        );
-        (
-        isNotMine(First),
-        addNeighbourMines(N, Others)
-        )
-    ).
+    Tail == x,
+    !,
+    M is N-1,
+    addNeighbourMines(M, Others, NotMines, NewNotMines, Added).
 
+addNeighbourMines(N, [Tile-Tail|Others], NotMines, NewNotMines, NewAdded) :-
+    N >= 0,
+    \+ member(Tile-Tail, NotMines),
+    Tail = x,
+    O is N-1,
+    addNeighbourMines(O, Others, NotMines, NewNotMines, Added),
+    NewAdded is Added + 1.
+
+addNeighbourMines(N, [Tile-Tail|Others], NotMines, NewNewNotMines, Added) :-
+    N >= 0,
+    Tail \== x,
+    listWithElem(NotMines, Tile-Tail, NewNotMines),
+    addNeighbourMines(N, Others, NewNotMines, NewNewNotMines, Added).
+
+listWithElem(List, Elem, List) :-
+    member(Elem, List),
+    !.
+listWithElem(List, Elem, [Elem|List]).
+
+addNumbers(_, [], _).
+addNumbers(Board, [Row|Rows], NotMines) :-
+    addNumbersRow(Board, Row, NotMines),
+    addNumbers(Board, Rows, NotMines).
+
+addNumbersRow(_,[], _).
+addNumbersRow(Board, [_-Tail|Rest], NotMines) :-
+    Tail == x,
+    !,
+    addNumbersRow(Board, Rest, NotMines).
+addNumbersRow(Board, [Tile-Tail|Rest], NotMines) :-
+    isNumber(Tile-Tail),
+    !,
+    addNumbersRow(Board, Rest, NotMines).
+addNumbersRow(Board, [Tile-Tail|Rest], NotMines) :-
+    neighbours(Board, Tile-Tail, N),
+    countMines(N, Tail, NotMines),
+    addNumbersRow(Board, Rest, NotMines).
 
 solution(Board) :-
     totalNumMines(N),
-    satisfyNumbers(N, Board, Rest),
-    distributeRest(Board, Rest),
-    boardFine(Board).
+    satisfyNumbers(Board, N, Board, Rest, [], NotMines),
+    distributeRest(Board, Rest, NotMines),
+    addNumbers(Board, Board, NotMines).
+
+distributeRest(_, 0, _) :- !.
+
+distributeRest([Row|Rest], N, NotMines) :-
+    distributeRow(Row, M, NotMines),
+    O is N - M,
+    O >= 0,
+    distributeRest(Rest, O, NotMines).
+
+distributeRow([], 0, _).
+distributeRow([_|Xs], N, NotMines) :-
+    distributeRow(Xs, N, NotMines).
+distributeRow([Tile-X | Xs], N, NotMines) :-
+    \+ X == x,
+    \+ member(Tile-X, NotMines),
+    X = x,
+    distributeRow(Xs, M, NotMines),
+    N is M+1.
 
 % get neighbours of a tile
+% findall didn't unify the variables
 neighbours(Board, Elem, Result) :- 
-    findall(OtherElem, neighbour(Board, Elem, OtherElem), Result).
+    topLeft(Board, Elem, A),
+    topMid(Board, Elem, B),
+    topRight(Board, Elem, C),
+    midLeft(Board, Elem, D),
+    midRight(Board, Elem, E),
+    botLeft(Board, Elem, F),
+    botMid(Board, Elem, G),
+    botRight(Board, Elem, H),
+    clearEmpty([A,B,C,D,E,F,G,H], Result).
 
-neighbour(Board, Elem, OtherElem) :-
-    isRowNeighbour(Board, Elem, OtherElem).
-neighbour(Board, Elem, OtherElem) :- 
-    collumnNeighbour(Board, Elem, OtherElem);
-    collumnNeighbour(Board, OtherElem, Elem).
+clearEmpty([], []) :- !.
+clearEmpty([empty|Rest], Result) :-
+    clearEmpty(Rest, Result),
+    !.
+clearEmpty([X|Rest], [X|Result]) :-
+    X \== empty,
+    clearEmpty(Rest, Result),
+    !.
 
-isRowNeighbour([Row | _ ], Elem, OtherElem) :- 
+midLeft([Row|_], Elem, OtherElem) :-
     member(Elem, Row),
-    rowNeighbour(Row, Elem, OtherElem).
-isRowNeighbour([_ | Rest], Elem, OtherElem) :-
-    isRowNeighbour(Rest, Elem, OtherElem).
+    !,
+    rowLeft(Row, Elem, OtherElem).
+midLeft([_|Rest], Elem, OtherElem) :-
+    midLeft(Rest, Elem, OtherElem).
+
+rowLeft([Elem|_], Elem, empty) :- !.
+rowLeft([OtherElem, Elem | _], Elem, OtherElem) :- !.
+rowLeft([_|Rest], Elem, OtherElem) :-
+    rowLeft(Rest, Elem, OtherElem).
+
+midRight([Row|_], Elem, OtherElem) :-
+    member(Elem, Row),
+    !,
+    rowRight(Row, Elem, OtherElem).
+midRight([_|Rest], Elem, OtherElem) :-
+    midRight(Rest, Elem, OtherElem).
+
+rowRight([Elem], Elem, empty) :- !.
+rowRight([Elem, OtherElem | _], Elem, OtherElem) :- !.
+rowRight([_|Rest], Elem, OtherElem) :-
+    rowRight(Rest, Elem, OtherElem).
+
+topLeft([Row1 | _], Elem, empty) :-
+    member(Elem, Row1),
+    !.
+topLeft([_, Row2 | _], Elem, empty) :-
+    nth0(0, Row2, Elem),
+    !.
+topLeft([Row1, Row2 | _], Elem, OtherElem) :-
+    nth0(N, Row2, Elem),
+    M is N-1,
+    nth0(M, Row1, OtherElem),
+    !.
+topLeft([_|Rest], Elem, OtherElem) :-
+    topLeft(Rest, Elem, OtherElem).
+
+topMid([Row1 | _], Elem, empty) :-
+    member(Elem, Row1),
+    !.
+topMid([Row1, Row2 | _], Elem, OtherElem) :-
+    nth0(N, Row2, Elem),
+    nth0(N, Row1, OtherElem),
+    !.
+topMid([_| Rest], Elem, OtherElem) :-
+    topMid(Rest, Elem, OtherElem).
+
+topRight([Row1 | _], Elem, empty) :-
+    member(Elem, Row1),
+    !.
+topRight([_, Row2 | _], Elem, empty) :-
+    nth0(7, Row2, Elem),
+    !.
+topRight([Row1, Row2 | _], Elem, OtherElem) :-
+    nth0(N, Row2, Elem),
+    M is N+1,
+    nth0(M, Row1, OtherElem),
+    !.
+topRight([_|Rest], Elem, OtherElem) :-
+    topRight(Rest, Elem, OtherElem).
+
+botLeft([_], _, empty) :-!.
+botLeft([Row1 | _], Elem, empty) :-
+    nth0(0, Row1, Elem),
+    !.
+botLeft([Row1, Row2 | _], Elem, OtherElem) :-
+    nth0(N, Row1, Elem),
+    M is N-1,
+    nth0(M, Row2, OtherElem),
+    !.
+botLeft([_|Rest], Elem, OtherElem) :-
+    botLeft(Rest, Elem, OtherElem).
+
+botMid([_], _, empty) :- !.
+botMid([Row1, Row2 | _], Elem, OtherElem) :-
+    nth0(N, Row1, Elem),
+    nth0(N, Row2, OtherElem),
+    !.
+botMid([_| Rest], Elem, OtherElem) :-
+    botMid(Rest, Elem, OtherElem).
+
+botRight([_], _, empty) :- !.
+botRight([Row1 | _], Elem, empty) :-
+    nth0(7, Row1, Elem),
+    !.
+botRight([Row1, Row2 | _], Elem, OtherElem) :-
+    nth0(N, Row1, Elem),
+    M is N+1,
+    nth0(M, Row2, OtherElem),
+    !.
+botRight([_|Rest], Elem, OtherElem) :-
+    botRight(Rest, Elem, OtherElem).
 
 collumnNeighbour([Row1, Row2 | _], Elem, OtherElem) :-
     nth0(N, Row1, Elem),
@@ -204,7 +324,3 @@ collumnNeighbour([Row1, Row2 | _], Elem, OtherElem) :-
     nth0(M, Row2, OtherElem).
 collumnNeighbour([_|Rest], Elem, OtherElem) :-
     collumnNeighbour(Rest, Elem, OtherElem).
-
-rowNeighbour([Elem, OtherElem | _], Elem, OtherElem).
-rowNeighbour([OtherElem, Elem | _], Elem, OtherElem).
-rowNeighbour([ _ | Rest], Elem, OtherElem) :- rowNeighbour(Rest, Elem, OtherElem).
