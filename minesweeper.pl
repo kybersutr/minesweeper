@@ -1,3 +1,5 @@
+% global variables
+% ----------------------------------------------------------------------------------------------------
 totalNumMines(10).
 
 % Políčka musí být rozlišitelná, i když budou obsahovat stejné číslo
@@ -56,19 +58,20 @@ gameBoard4(
     ]
     ).
 
-% ------------------------------------------------------------------------------------------
-
-countMines([],0, _).
-countMines([_-A | Rest], Result, NotMines) :-
-    (
-        A == x,
-        countMines(Rest, CountRest, NotMines),
-        Result is CountRest + 1
-    );
-    (
-        A \== x,
-        countMines(Rest, Result, NotMines)
+gameBoard5(
+    [
+        [a1-_, a2-_, a3-_, a4-_, a5-1, a6-_, a7-_, a8-_],
+        [b1-_, b2-_, b3-_, b4-_, b5-_, b6-_, b7-_, b8-_],
+        [c1-_, c2-_, c3-_, c4-1, c5-_, c6-_, c7-_, c8-_],
+        [d1-_, d2-_, d3-_, d4-_, d5-_, d6-_, d7-_, d8-2],
+        [e1-_, e2-_, e3-_, e4-_, e5-_, e6-_, e7-1, e8-_],
+        [f1-_, f2-3, f3-_, f4-_, f5-_, f6-_, f7-1, f8-_],
+        [g1-4, g2-_, g3-_, g4-_, g5-_, g6-_, g7-_, g8-1],
+        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
+    ]
     ).
+
+% ------------------------------------------------------------------------------------------
 
 show([]).
 show([Row | Rest]) :-
@@ -102,6 +105,20 @@ isNumber( _-Tile) :-
      Tile == 6;
      Tile == 7;
      Tile == 8.
+
+% predicates for viable solution generation
+% ----------------------------------------------------------------------------------------------------------------------------
+countMines([],0, _).
+countMines([_-A | Rest], Result, NotMines) :-
+    (
+        A == x,
+        countMines(Rest, CountRest, NotMines),
+        Result is CountRest + 1
+    );
+    (
+        A \== x,
+        countMines(Rest, Result, NotMines)
+    ).
 
 %satisfyNumbers(+FullBoard, +MaximumNumberOfMines, +BoardYetToSatisfy, -RemainingNumberOfMines, +NotMinesOld, -NotMinesNew)
 satisfyNumbers(_, K, [], K, N, N).
@@ -171,11 +188,36 @@ addNumbersRow(Board, [Tile-Tail|Rest], NotMines) :-
     countMines(N, Tail, NotMines),
     addNumbersRow(Board, Rest, NotMines).
 
-solution(Board) :-
+% it's much faster to take care of the known numbers first
+solution(Board, Forbidden) :-
     totalNumMines(N),
-    satisfyNumbers(Board, N, Board, Rest, [], NotMines),
-    distributeRest(Board, Rest, NotMines),
+    satisfyNumbers(Board, N, Board, Rest, Forbidden, NotMines),
+    distributeRandomly(Board, Rest, NotMines, 50),
     addNumbers(Board, Board, NotMines).
+
+% distributeRandomly(+Board, +NumMines, +NotMines, +MaxRecursionDepth)
+% if MaxRecursionDepth is reached, distribute the rest of the mines deterministically
+distributeRandomly(_, 0,_, _) :- !.
+distributeRandomly(Board, N, NotMines, 0) :-
+    !,
+    distributeRest(Board, N, NotMines).
+distributeRandomly(Board, N, NotMines, M) :-
+    random_member(Row, Board),
+    random_member(Tile-Tail, Row),
+    NewMax is M - 1,
+    (
+        (
+            Tail \== x,
+            \+ member(Tile-Tail, NotMines),
+            Tail = x,
+            O is N-1,
+            !,
+            distributeRandomly(Board, O, NotMines, NewMax)
+        );
+        (
+            distributeRandomly(Board, N, NotMines, NewMax)
+        )
+    ).
 
 distributeRest(_, 0, _) :- !.
 
@@ -196,6 +238,7 @@ distributeRow([Tile-X | Xs], N, NotMines) :-
     N is M+1.
 
 % get neighbours of a tile
+% it would be much simpler to just use findall but
 % findall didn't unify the variables
 neighbours(Board, Elem, Result) :- 
     topLeft(Board, Elem, A),
@@ -324,3 +367,62 @@ collumnNeighbour([Row1, Row2 | _], Elem, OtherElem) :-
     nth0(M, Row2, OtherElem).
 collumnNeighbour([_|Rest], Elem, OtherElem) :-
     collumnNeighbour(Rest, Elem, OtherElem).
+
+% gameplay predicates
+% ------------------------------------------------------------------------------------
+
+visibleBoard(
+    [
+        [a1-_, a2-_, a3-_, a4-_, a5-_, a6-_, a7-_, a8-_],
+        [b1-_, b2-_, b3-_, b4-_, b5-_, b6-_, b7-_, b8-_],
+        [c1-_, c2-_, c3-_, c4-_, c5-_, c6-_, c7-_, c8-_],
+        [d1-_, d2-_, d3-_, d4-_, d5-_, d6-_, d7-_, d8-_],
+        [e1-_, e2-_, e3-_, e4-_, e5-_, e6-_, e7-_, e8-_],
+        [f1-_, f2-_, f3-_, f4-_, f5-_, f6-_, f7-_, f8-_],
+        [g1-_, g2-_, g3-_, g4-_, g5-_, g6-_, g7-_, g8-_],
+        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
+    ]
+    ).
+
+showCertain([]).
+showCertain([Row | Rest]) :-
+    showRowCertain(Row), 
+    nl,
+    showCertain(Rest).
+
+showRowCertain([]).
+showRowCertain([_-A | Rest]) :-
+    A == x,
+    !,
+    write(' '),
+    write(x),
+    write('  '),
+    showRowCertain(Rest).
+
+showRowCertain([Tile-A | Rest]) :-
+    isNumber(Tile-A),
+    !,
+    write(' '),
+    write(A),
+    write('  '),
+    showRowCertain(Rest).
+
+showRowCertain([Tile-_ | Rest]) :-
+    write(Tile),
+    write('  '),
+    showRowCertain(Rest).
+
+
+win(_).
+play(Board, Visible) :- win(Visible), write("The end!").
+play(Board, Visible) :-
+    getTile(Tile),
+    solution(Board, [Tile]),
+    addVisible(Visible, NewVisible),
+    copyVisible(Board, NewVisible, NewBoard),
+    play(NewBoard, NewVisible).
+play(Board, _) :-
+    write("You lose."),
+    nl,
+    solution(Board, []),
+    show(Board).
