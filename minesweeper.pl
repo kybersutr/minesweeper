@@ -2,8 +2,8 @@
 % ----------------------------------------------------------------------------------------------------
 totalNumMines(10).
 
-% Políčka musí být rozlišitelná, i když budou obsahovat stejné číslo
-% -> budeme používat formát ID-číslo/mina (např a2-7)
+% To differentiate the tiles without indexing
+% we'll use format ID-number/mine (e.g. a2-7)
 
 miniBoard([[a-1, b-_],[c-1, d-_]]).
 
@@ -106,6 +106,12 @@ isNumber( _-Tile) :-
      Tile == 7;
      Tile == 8.
 
+listWithElem(List, Elem, List) :-
+    member(Elem, List),
+    !.
+listWithElem(List, Elem, [Elem|List]).
+
+
 % predicates for viable solution generation
 % ----------------------------------------------------------------------------------------------------------------------------
 countMines([],0, _).
@@ -140,7 +146,7 @@ satisfyNumbersRow(Board, N, [Coords-Count|Rest], M, NotMinesOld, NotMinesNew) :-
 satisfyNumbersRow(Board, N, [_|Rest], M, NotMinesOld, NotMinesNew) :-
     satisfyNumbersRow(Board, N, Rest, M, NotMinesOld, NotMinesNew).
 
-%addNeighbourMines(+Count, +Neighbours, +NotMines)
+%addNeighbourMines(+Count, +Neighbours, +NotMines, -NewNotMines, +NumOfMinesAdded)
 addNeighbourMines(0, [], N, N, 0).
 
 addNeighbourMines(N, [_-Tail|Others], NotMines, NewNotMines, Added) :-
@@ -163,11 +169,6 @@ addNeighbourMines(N, [Tile-Tail|Others], NotMines, NewNewNotMines, Added) :-
     Tail \== x,
     listWithElem(NotMines, Tile-Tail, NewNotMines),
     addNeighbourMines(N, Others, NewNotMines, NewNewNotMines, Added).
-
-listWithElem(List, Elem, List) :-
-    member(Elem, List),
-    !.
-listWithElem(List, Elem, [Elem|List]).
 
 addNumbers(_, [], _).
 addNumbers(Board, [Row|Rows], NotMines) :-
@@ -354,35 +355,8 @@ botRight([Row1, Row2 | _], Elem, OtherElem) :-
 botRight([_|Rest], Elem, OtherElem) :-
     botRight(Rest, Elem, OtherElem).
 
-collumnNeighbour([Row1, Row2 | _], Elem, OtherElem) :-
-    nth0(N, Row1, Elem),
-    M is N-1,
-    nth0(M, Row2, OtherElem).
-collumnNeighbour([Row1, Row2 | _], Elem, OtherElem) :-
-    nth0(N, Row1, Elem),
-    nth0(N, Row2, OtherElem).
-collumnNeighbour([Row1, Row2 | _], Elem, OtherElem) :-
-    nth0(N, Row1, Elem),
-    M is N+1,
-    nth0(M, Row2, OtherElem).
-collumnNeighbour([_|Rest], Elem, OtherElem) :-
-    collumnNeighbour(Rest, Elem, OtherElem).
-
 % gameplay predicates
 % ------------------------------------------------------------------------------------
-
-visibleBoard(
-    [
-        [a1-_, a2-_, a3-_, a4-_, a5-_, a6-_, a7-_, a8-_],
-        [b1-_, b2-_, b3-_, b4-_, b5-_, b6-_, b7-_, b8-_],
-        [c1-_, c2-_, c3-_, c4-_, c5-_, c6-_, c7-_, c8-_],
-        [d1-_, d2-_, d3-_, d4-_, d5-_, d6-_, d7-_, d8-_],
-        [e1-_, e2-_, e3-_, e4-_, e5-_, e6-_, e7-_, e8-_],
-        [f1-_, f2-_, f3-_, f4-_, f5-_, f6-_, f7-_, f8-_],
-        [g1-_, g2-_, g3-_, g4-_, g5-_, g6-_, g7-_, g8-_],
-        [h1-_, h2-_, h3-_, h4-_, h5-_, h6-_, h7-_, h8-_]
-    ]
-    ).
 
 showCertain([]).
 showCertain([Row | Rest]) :-
@@ -428,13 +402,40 @@ getTile(Tile-_) :-
 
 getTile(Tile) :- getTile(Tile).
 
-win(_).
-play(Board, Visible) :- win(Visible), write("The end!").
+win(Visible) :-
+    totalNumMines(N),
+    WinCount is 64 - N,
+    length(Visible, WinCount).
+
+% copyVisible(+Board, +Visible, -NewBoard)
+copyVisible([], _, []).
+copyVisible([Row|Rest], Visible, [NewRow|NewRest]) :-
+    copyRow(Row, Visible, NewRow),
+    copyVisible(Rest, Visible, NewRest).
+
+copyRow([], _, []).
+copyRow([X | Rest], Visible, [X | NewRest]) :-
+    member(X, Visible),
+    !,
+    copyRow(Rest, Visible, NewRest).
+copyRow([Tile-_ | Rest], Visible, [Tile-_ | NewRest]) :-
+    copyRow(Rest, Visible, NewRest).
+
+
+play(Board, Visible) :- 
+    win(Visible), 
+    write("You won!"),
+    nl,
+    solution(Board, []),
+    show(Board),
+    !.
+
 play(Board, Visible) :-
     getTile(Tile),
     solution(Board, [Tile]),
-    addVisible(Visible, NewVisible),
+    listWithElem(Visible, Tile, NewVisible),
     copyVisible(Board, NewVisible, NewBoard),
+    showCertain(NewBoard),
     play(NewBoard, NewVisible).
 
 play(Board, _) :-
@@ -445,5 +446,5 @@ play(Board, _) :-
 
 minesweeper() :-
     gameBoard(B),
-    visibleBoard(V),
-    play(B, V).
+    showCertain(B),
+    play(B, []).
